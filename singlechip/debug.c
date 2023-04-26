@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include <time.h>
 
+#define _SOUCE_DEBUG_C_ 1
 #include "debug.h"
 
 

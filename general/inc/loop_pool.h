@@ -43,6 +43,7 @@ extern "C"{
 
 static __attribute__ ((__used__)) int __looppool_gpio_debounce(uint32_t debounce_ms, int new_gpio_state, uint32_t *last_time, 
                                         uint32_t *last_state, uint32_t *last_last_state){
+    if(debounce_ms == 0) return new_gpio_state;
     if(*last_state == 0xffffffff)
     {
         *last_time = _looppool_get_tickms();
