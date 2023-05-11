@@ -24,11 +24,11 @@ extern "C"{
 #include <time.h>
 /* ######################### CONFIG ######################### */
 #define DEBUG_DEFAULT_LEVEL         DBG_DEBUG            /* 默认打印等级 */
-#define DEBUG_DEFAULT_TIMEZONE      (8*60*60)           /* 时间戳偏移 */
-#define DEBUG_BUF_SIZE              128                 /* print格式化缓冲区 */
-#define DEBUG_USE_FREEROTS          1                   /* 使用FreeRTOS,使用freertos后会将自动开启互斥锁 */
-#define DEBUG_USE_LOCK              1                   /* 使用互斥锁 */
-#define DEBUG_USE_TIME              0                   /* 使用时间显示 */
+#define DEBUG_DEFAULT_TIMEZONE      (8*60*60)            /* 时间戳偏移 */
+#define DEBUG_BUF_SIZE              4096                 /* print格式化缓冲区 */
+#define DEBUG_USE_FREEROTS          1                    /* 使用FreeRTOS,使用freertos后会将自动开启互斥锁 */
+#define DEBUG_USE_LOCK              1                    /* 使用互斥锁 */
+#define DEBUG_USE_TIME              0                    /* 使用时间显示 */
 
 /*  
  * debug.c中定义了_SOUCE_DEBUG_C_,下面实现的函数会在debug.c中作为定义被编译
@@ -105,13 +105,45 @@ extern DBG_LEVEL dbgLevel;
 extern int debug_printf(int is_lock, int is_print_time,const char *format, ...);
 extern void debug_phex(const void *buf,  int len);
 
-#define DBG_print_hex(level,buf,len) 	 if(level<=dbgLevel)       debug_phex((buf),(len))
-#define DBG_print_fl(level,s,params...)  if(level<=dbgLevel)       debug_printf(1, 1, "[%s, %d]: " s "\r\n", __FUNCTION__, __LINE__, ##params)
+
 #define DBG_print(level,s,params...)     if(level<=dbgLevel)       debug_printf(1, 1, s "\r\n", ##params)
+#define DBG_print_fl(level,s,params...)  if(level<=dbgLevel)       debug_printf(1, 1, "[%s, %d]: " s "\r\n", __FUNCTION__, __LINE__, ##params)
 #define DBG_printf(level,s,params...)    if(level<=dbgLevel)       debug_printf(1, 1, s , ##params)
-#define DBG_printf_raw(level,s,params...) 	 if(level<=dbgLevel)   debug_printf(1, 1, s ,##params)
+#define DBG_print_hex(level,buf,len) 	 if(level<=dbgLevel)       debug_phex((buf),(len))
+#define DBG_printf_raw(level,s,params...) 	 if(level<=dbgLevel)   debug_printf(1, 0, s ,##params)
 #define DBG_set_dbg_Level(_level) 		 (dbgLevel = (_level))
 
+/* ######################## 下面是简单写法 ####################### */
+/* 带自动回车的版本 */
+#define dbg_debugln(s,params...)        DBG_print(DBG_DEBUG, s, ##params)
+#define dbg_infoln(s,params...)         DBG_print(DBG_INFO, s, ##params)
+#define dbg_sysln(s,params...)          DBG_print(DBG_SYS, s, ##params)
+#define dbg_warnln(s,params...)         DBG_print(DBG_WARNING, s, ##params)
+#define dbg_errln(s,params...)          DBG_print(DBG_ERR, s, ##params)
+/* 带自动回车，且带函数定位 */
+#define dbg_debugfl(s,params...)        DBG_print_fl(DBG_DEBUG, s, ##params)
+#define dbg_infofl(s,params...)         DBG_print_fl(DBG_INFO, s, ##params)
+#define dbg_sysfl(s,params...)          DBG_print_fl(DBG_SYS, s, ##params)
+#define dbg_warnfl(s,params...)         DBG_print_fl(DBG_WARNING, s, ##params)
+#define dbg_errfl(s,params...)          DBG_print_fl(DBG_ERR, s, ##params)
+/* 不带回车 */
+#define dbg_debug(s,params...)          DBG_printf(DBG_DEBUG, s, ##params)
+#define dbg_info(s,params...)           DBG_printf(DBG_INFO, s, ##params)
+#define dbg_sys(s,params...)            DBG_printf(DBG_SYS, s, ##params)
+#define dbg_warn(s,params...)           DBG_printf(DBG_WARNING, s, ##params)
+#define dbg_err(s,params...)            DBG_printf(DBG_ERR, s, ##params)
+/* 打印内核的hex值 */
+#define dbg_debughex(buf,len)           DBG_print_hex(DBG_DEBUG, buf, len)
+#define dbg_infohex(buf,len)            DBG_print_hex(DBG_INFO, buf, len)
+#define dbg_syshex(buf,len)             DBG_print_hex(DBG_SYS, buf, len)
+#define dbg_warnhex(buf,len)            DBG_print_hex(DBG_WARNING, buf, len)
+#define dbg_errhex(buf,len)             DBG_print_hex(DBG_ERR, buf, len)
+/* 打印原始数据,其他版本都带由时间显示（开启DEBUG_USE_TIME宏时） */
+#define dbg_debugraw(s,params...)       DBG_printf_raw(DBG_DEBUG, s, ##params)
+#define dbg_inforaw(s,params...)        DBG_printf_raw(DBG_INFO, s, ##params)
+#define dbg_sysraw(s,params...)         DBG_printf_raw(DBG_SYS, s, ##params)
+#define dbg_warnraw(s,params...)        DBG_printf_raw(DBG_WARNING, s, ##params)
+#define dbg_errraw(s,params...)         DBG_printf_raw(DBG_ERR, s, ##params)
 
 /**
  * @brief 打印错误原因，且执行 action 语句
