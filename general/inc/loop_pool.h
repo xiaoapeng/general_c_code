@@ -41,16 +41,16 @@ extern "C"{
         }\
     }while(0)
 
-static __attribute__ ((__used__)) int __looppool_gpio_debounce(uint32_t debounce_ms, int new_gpio_state, uint32_t *last_time, 
+static __attribute__ ((__used__)) int __looppool_bool_debounce(uint32_t debounce_ms, int new_bool_state, uint32_t *last_time, 
                                         uint32_t *last_state, uint32_t *last_last_state){
-    if(debounce_ms == 0) return new_gpio_state;
+    if(debounce_ms == 0) return new_bool_state;
     if(*last_state == 0xffffffff)
     {
         *last_time = _looppool_get_tickms();
-        *last_last_state = *last_state = new_gpio_state;
-        return new_gpio_state;
+        *last_last_state = *last_state = new_bool_state;
+        return new_bool_state;
     }
-    if(*last_state == new_gpio_state){
+    if(*last_state == new_bool_state){
         if((_looppool_get_tickms() - *last_time) > debounce_ms){
             *last_last_state = *last_state;
         }
@@ -61,18 +61,20 @@ static __attribute__ ((__used__)) int __looppool_gpio_debounce(uint32_t debounce
     return *last_last_state;
 }
 
-
 /**
- * @brief 自动防抖，此宏必须要被定时调用，否则会出现bug
+ * @brief 自动防抖，此宏必须要被定时调用，且调用频率必须远大于防抖的时间
+          否则会产生bug
  * @param debounce_ms       防抖时间
- * @param gpio_read_func    获取读GPIO的函数块
+ * @param current_bool      当前bool值
  */
-#define LOOPPOOL_GPIO_DEBOUNCE(debounce_ms, gpio_read_func)       ({\
+#define LOOPPOOL_BOOL_DEBOUNCE(debounce_ms, current_bool)       ({\
     static uint32_t __last_time__ = 0;                                  \
     static uint32_t __last_state__ = 0xffffffff;                        \
     static uint32_t __last_last_state__ = 0;                            \
-    __looppool_gpio_debounce(debounce_ms, !!(gpio_read_func), &__last_time__, &__last_state__, &__last_last_state__);  \
+    __looppool_bool_debounce(debounce_ms, !!(current_bool), &__last_time__, &__last_state__, &__last_last_state__);  \
 })
+
+
 
 #ifdef __cplusplus
 #if __cplusplus
