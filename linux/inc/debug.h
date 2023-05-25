@@ -20,7 +20,7 @@ extern "C"{
 #endif /* __cplusplus */
 
 #define LOG_INTERVAL_TIME 		20			/* N分钟一个文件 */
-#define LOG_MAX_FILE_COUNT		10			/* 最多能存储M个文件 */
+#define LOG_MAX_FILE_COUNT		0			/* 最多能存储M个文件 */
 #define LOG_DIR_PATH			"/userdata/log"	    /* 日志路径 */
 
 typedef enum _DBG_LEVEL
@@ -41,45 +41,46 @@ extern void debug_phex(const void *buf,  int len);
 extern int debug_init(void);
 extern void debug_exit(void);
 
-#define DBG_print(level,s, ...)     if(level<=dbgLevel)       debug_printf(1, 1, s "\r\n", __VA_ARGS__)
-#define DBG_print_fl(level,s, ...)  if(level<=dbgLevel)       debug_printf(1, 1, "[%s, %d]: " s "\r\n", __FUNCTION__, __LINE__, __VA_ARGS__)
-#define DBG_printf(level,s, ...)    if(level<=dbgLevel)       debug_printf(1, 1, s , __VA_ARGS__)
-#define DBG_print_hex(level,buf,len) 	 if(level<=dbgLevel)       debug_phex((buf),(len))
-#define DBG_printf_raw(level,s, ...) 	 if(level<=dbgLevel)   debug_printf(1, 0, s ,__VA_ARGS__)
-#define DBG_set_dbg_Level(_level) 		 (dbgLevel = (_level))
+
+#define DBG_print(level,s, ...)        if(level<=dbg_level) debug_printf(1, s "\r\n", ##__VA_ARGS__)
+#define DBG_print_fl(level,s, ...)     if(level<=dbg_level) debug_printf(1, "[%s, %d]: " s "\r\n", __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define DBG_printf(level,s, ...)       if(level<=dbg_level) debug_printf(1, s , ##__VA_ARGS__)
+#define DBG_print_hex(level,buf,len) 	    if(level<=dbg_level) debug_phex((buf),(len))
+#define DBG_printf_raw(level,s, ...) 	if(level<=dbg_level) debug_printf(0, s ,##__VA_ARGS__)
+#define DBG_set_dbg_Level(_level) 		 (dbg_level = (_level))
 
 
 /* ######################## 下面是简单写法 ####################### */
 /* 带自动回车的版本 */
-#define dbg_debugln(s, ...)        DBG_print(DBG_DEBUG, s, __VA_ARGS__)
-#define dbg_infoln(s, ...)         DBG_print(DBG_INFO, s, __VA_ARGS__)
-#define dbg_sysln(s, ...)          DBG_print(DBG_SYS, s, __VA_ARGS__)
-#define dbg_warnln(s, ...)         DBG_print(DBG_WARNING, s, __VA_ARGS__)
-#define dbg_errln(s, ...)          DBG_print(DBG_ERR, s, __VA_ARGS__)
+#define dbg_debugln(s, ...)        DBG_print(DBG_DEBUG, s, ##__VA_ARGS__)
+#define dbg_infoln(s, ...)         DBG_print(DBG_INFO, s, ##__VA_ARGS__)
+#define dbg_sysln(s, ...)          DBG_print(DBG_SYS, s, ##__VA_ARGS__)
+#define dbg_warnln(s, ...)         DBG_print(DBG_WARNING, s, ##__VA_ARGS__)
+#define dbg_errln(s, ...)          DBG_print(DBG_ERR, s, ##__VA_ARGS__)
 /* 带自动回车，且带函数定位 */
-#define dbg_debugfl(s, ...)        DBG_print_fl(DBG_DEBUG, s, __VA_ARGS__)
-#define dbg_infofl(s, ...)         DBG_print_fl(DBG_INFO, s, __VA_ARGS__)
-#define dbg_sysfl(s, ...)          DBG_print_fl(DBG_SYS, s, __VA_ARGS__)
-#define dbg_warnfl(s, ...)         DBG_print_fl(DBG_WARNING, s, __VA_ARGS__)
-#define dbg_errfl(s, ...)          DBG_print_fl(DBG_ERR, s, __VA_ARGS__)
+#define dbg_debugfl(s, ...)        DBG_print_fl(DBG_DEBUG, s, ##__VA_ARGS__)
+#define dbg_infofl(s, ...)         DBG_print_fl(DBG_INFO, s, ##__VA_ARGS__)
+#define dbg_sysfl(s, ...)          DBG_print_fl(DBG_SYS, s, ##__VA_ARGS__)
+#define dbg_warnfl(s, ...)         DBG_print_fl(DBG_WARNING, s, ##__VA_ARGS__)
+#define dbg_errfl(s, ...)          DBG_print_fl(DBG_ERR, s, ##__VA_ARGS__)
 /* 不带回车 */
-#define dbg_debug(s, ...)          DBG_printf(DBG_DEBUG, s, __VA_ARGS__)
-#define dbg_info(s, ...)           DBG_printf(DBG_INFO, s, __VA_ARGS__)
-#define dbg_sys(s, ...)            DBG_printf(DBG_SYS, s, __VA_ARGS__)
-#define dbg_warn(s, ...)           DBG_printf(DBG_WARNING, s, __VA_ARGS__)
-#define dbg_err(s, ...)            DBG_printf(DBG_ERR, s, __VA_ARGS__)
+#define dbg_debug(s, ...)          DBG_printf(DBG_DEBUG, s, ##__VA_ARGS__)
+#define dbg_info(s, ...)           DBG_printf(DBG_INFO, s, ##__VA_ARGS__)
+#define dbg_sys(s, ...)            DBG_printf(DBG_SYS, s, ##__VA_ARGS__)
+#define dbg_warn(s, ...)           DBG_printf(DBG_WARNING, s, ##__VA_ARGS__)
+#define dbg_err(s, ...)            DBG_printf(DBG_ERR, s, ##__VA_ARGS__)
 /* 打印内核的hex值 */
-#define dbg_debughex(buf,len)           DBG_print_hex(DBG_DEBUG, buf, len)
-#define dbg_infohex(buf,len)            DBG_print_hex(DBG_INFO, buf, len)
-#define dbg_syshex(buf,len)             DBG_print_hex(DBG_SYS, buf, len)
-#define dbg_warnhex(buf,len)            DBG_print_hex(DBG_WARNING, buf, len)
-#define dbg_errhex(buf,len)             DBG_print_hex(DBG_ERR, buf, len)
+#define dbg_debughex(buf,len)      DBG_print_hex(DBG_DEBUG, buf, len)
+#define dbg_infohex(buf,len)       DBG_print_hex(DBG_INFO, buf, len)
+#define dbg_syshex(buf,len)        DBG_print_hex(DBG_SYS, buf, len)
+#define dbg_warnhex(buf,len)       DBG_print_hex(DBG_WARNING, buf, len)
+#define dbg_errhex(buf,len)        DBG_print_hex(DBG_ERR, buf, len)
 /* 打印原始数据,其他版本都带由时间显示（开启DEBUG_USE_TIME宏时） */
-#define dbg_debugraw(s, ...)       DBG_printf_raw(DBG_DEBUG, s, __VA_ARGS__)
-#define dbg_inforaw(s, ...)        DBG_printf_raw(DBG_INFO, s, __VA_ARGS__)
-#define dbg_sysraw(s, ...)         DBG_printf_raw(DBG_SYS, s, __VA_ARGS__)
-#define dbg_warnraw(s, ...)        DBG_printf_raw(DBG_WARNING, s, __VA_ARGS__)
-#define dbg_errraw(s, ...)         DBG_printf_raw(DBG_ERR, s, __VA_ARGS__)
+#define dbg_debugraw(s, ...)       DBG_printf_raw(DBG_DEBUG, s, ##__VA_ARGS__)
+#define dbg_inforaw(s, ...)        DBG_printf_raw(DBG_INFO, s, ##__VA_ARGS__)
+#define dbg_sysraw(s, ...)         DBG_printf_raw(DBG_SYS, s, ##__VA_ARGS__)
+#define dbg_warnraw(s, ...)        DBG_printf_raw(DBG_WARNING, s, ##__VA_ARGS__)
+#define dbg_errraw(s, ...)         DBG_printf_raw(DBG_ERR, s, ##__VA_ARGS__)
 
 
 
