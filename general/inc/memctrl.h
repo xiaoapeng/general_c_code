@@ -7,7 +7,7 @@
  * 
  * @copyright Copyright (c) 2023  simon.xiaoapeng@gmail.com
  * 
- * @par 修改日志:
+ *
  */
 
 #ifndef __MEMCTRL_H__
@@ -22,55 +22,128 @@ extern "C"{
 
 #include "bits.h"
 
-/***********************************
- *	内存自增
- *	参数：	
- *		 p :	地址
- *		len:	长度
- ***********************************/
-#define MEM_INC(p, len) ((typeof(p))((char *)(p) + (len)))
 
-/***********************************
- *	对单个变量进行字节序的转化
- *	参数：	
- *		ptr：	存放变量的指针
- *		len:	变量的长度
- ***********************************/
-#define BYTE_ORDER_CHANGE(ptr,len) \
-	do{\
-		int __i;\
-		char* __p = (char*)(ptr), __tmp;\
-		for(__i=0;__i<(len)/2;__i++)\
-		{\
-			__tmp = __p[__i];\
-			__p[__i] =__p[(len)-__i-1];\
-			__p[(len)-__i-1] = __tmp;\
-		}\
-	}while(0)
+#define _MEM_BYTE_ORDER_BIG 	4321			/* 大端定义 */
+#define _MEM_BYTE_ORDER_LITTLE  1234			/* 小段定义 */
+
+/* 用户可在这里使用 _MEM_USER_DEF_ORDER 定义字节序 */
+//#define _MEM_USER_DEF_ORDER 	_MEM_BYTE_ORDER_LITTLE
 
 
-/***********************************
- *	用一个值，来设置一段内存
- *	参数：	
- *		dst：	目的地址
- *		val:	值
- ***********************************/
+#ifdef _MEM_USER_DEF_ORDER
+#define _MEM_BYTE_ORDER 		(_MEM_USER_DEF_ORDER)
+#endif
+
+#if defined(_MEM_BYTE_ORDER) && _MEM_BYTE_ORDER != _MEM_BYTE_ORDER_BIG && _MEM_BYTE_ORDER != _MEM_BYTE_ORDER_LITTLE
+#undef _MEM_BYTE_ORDER
+#endif
+
+#ifndef _MEM_BYTE_ORDER
+	#if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__)
+		#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+			/* 大端 */
+			#define _MEM_BYTE_ORDER  _MEM_BYTE_ORDER_BIG
+		#else
+			#define _MEM_BYTE_ORDER  _MEM_BYTE_ORDER_LITTLE
+			/* 小段 */
+		#endif /* __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__ */
+	#else
+		/* 若没有定义__BYTE_ORDER__ 一般在windows系统上编译 那么默认系统类型为小端 */
+		#define _MEM_BYTE_ORDER  _MEM_BYTE_ORDER_LITTLE
+	#endif
+#endif
+
+
+/**
+ * @brief 内存字节序转换
+ * @param ptr 			指针
+ * @param len 			内容大小
+ */
+static inline void byte_order_change(void* ptr, uint32_t len){
+	int i; char *p = (char*)(ptr);
+	for(i=0;i<(len)/2;i++){
+		p[(len)-i-1] ^= p[i];
+		p[i] ^=p[(len)-i-1];
+		p[(len)-i-1] ^= p[i];
+	}
+}
+
+
+/**
+ * @brief 指针以单字节自增
+ * @param ptr 			指针
+ * @param len 			自增数
+ */
+#define MEM_INC(ptr, len) ((typeof(ptr))((char *)(ptr) + (len)))
+
+/**
+ * @brief 内存字节序转换
+ * @param ptr 			指针
+ * @param len 			内容大小
+ */
+#define BYTE_ORDER_CHANGE(ptr,len) byte_order_change((ptr), (len))
+
+/** 
+ * @brief 用一个值，来设置一段内存
+ *		val只有为变量的时候才能正确编译
+ *		注意：该宏在windows编译器用不了,使用宏SET_MEM_VAL_TYPE替代
+ * @param pdst 			目的地址
+ * @param val 			值
+ */
 #define SET_MEM_VAL(pdst,val) \
 		do{\
-			typeof(val) __tmp = (val);\
-			memcpy((pdst),&__tmp,sizeof(val));\
+			*((typeof(&val))(pdst)) = (val);\
+		}while(0)
+
+/** 
+ * @brief 用一个值，来设置一段内存
+ *		此版本可以用数字设置，可以在windows编译器下使用
+ * @param pdst 			目的地址
+ * @param val 			值
+ * @param type 			要设置值的类型
+ */
+#define SET_MEM_VAL_TYPE(pdst, val, type) \
+		do{\
+			*((type *)(pdst)) = (type)(val);\
 		}while(0)
 
 
-/***********************************
- *	获取内存中某个类型的值
- *	参数：	
- *		psrc	某段内存
- *		type:	该值的类型
- ***********************************/
-#define GET_MEM_VAL(psrc, type) ({\
-				*((type *)(psrc));\
-				})
+/* 设置内存时并将字节序翻转 */
+#define _SET_TURN_MEM_VAL_TYPE(pdst, val, type) \
+		do{\
+			*((type *)(pdst)) = (type)(val);\
+			byte_order_change((pdst), sizeof(type));\
+		}while(0)
+
+
+
+/** 
+ * @brief 用一个值，来设置一段内存
+ *		SET_LITTLE_MEM_VAL_TYPE: 设置时将其转换为小端
+ *		SET_BIG_MEM_VAL_TYPE:	 设置时将其转换为大端
+ * @param pdst 			目的地址
+ * @param val 			值
+ * @param type 			要设置值的类型
+ */
+#if _MEM_BYTE_ORDER == _MEM_BYTE_ORDER_LITTLE
+	#define SET_LITTLE_MEM_VAL_TYPE(pdst, val, type) 	SET_MEM_VAL_TYPE(pdst, val, type)
+	#define SET_BIG_MEM_VAL_TYPE(pdst, val, type)    	_SET_TURN_MEM_VAL_TYPE(pdst, val, type)
+#else
+	#define SET_BIG_MEM_VAL_TYPE(pdst, val, type)  	  	SET_MEM_VAL_TYPE(pdst, val, type)
+	#define SET_LITTLE_MEM_VAL_TYPE(pdst, val, type)  	_SET_TURN_MEM_VAL_TYPE(pdst, val, type)
+#endif
+
+
+
+/** 
+ * @brief 获取内存中某个类型的值
+ * @param pdst 			某段内存
+ * @param type 			类型
+ */
+#define GET_MEM_VAL(psrc, type)  (*((type *)(psrc)))
+
+
+
 
 
 #ifdef __cplusplus
