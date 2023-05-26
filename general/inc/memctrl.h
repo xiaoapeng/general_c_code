@@ -30,6 +30,12 @@ extern "C"{
 //#define _MEM_USER_DEF_ORDER 	_MEM_BYTE_ORDER_LITTLE
 
 
+
+
+
+
+
+
 #ifdef _MEM_USER_DEF_ORDER
 #define _MEM_BYTE_ORDER 		(_MEM_USER_DEF_ORDER)
 #endif
@@ -52,6 +58,19 @@ extern "C"{
 		#define _MEM_BYTE_ORDER  _MEM_BYTE_ORDER_LITTLE
 	#endif
 #endif
+
+/* 设置内存时并将字节序翻转,不公开 */
+#define _SET_TURN_MEM_VAL_TYPE(pdst, val, type) \
+		do{\
+			*((type *)(pdst)) = (type)(val);\
+			byte_order_change((pdst), sizeof(type));\
+		}while(0)
+
+
+
+
+
+
 
 
 /**
@@ -78,10 +97,23 @@ static inline void byte_order_change(void* ptr, uint32_t len){
 
 /**
  * @brief 内存字节序转换
+ *		BYTE_ORDER_CHANGE: 					执行字节序转换
+ *		BYTE_ORDER_LITTLE_TO_SYSTEM:		将内存中的小端字节序转换为系统字节序
+ *		BYTE_ORDER_BIG_TO_SYSTEM:			将内存中的大端字节序转换为系统字节序
  * @param ptr 			指针
  * @param len 			内容大小
  */
 #define BYTE_ORDER_CHANGE(ptr,len) byte_order_change((ptr), (len))
+
+#if _MEM_BYTE_ORDER == _MEM_BYTE_ORDER_LITTLE
+	#define BYTE_ORDER_LITTLE_TO_SYSTEM(ptr, len) 
+	#define BYTE_ORDER_BIG_TO_SYSTEM(ptr, len) 		BYTE_ORDER_CHANGE(ptr,len)
+#else
+	#define BYTE_ORDER_TO_LITTLE(ptr, len) 		BYTE_ORDER_CHANGE(ptr,len)
+	#define BYTE_ORDER_TO_BIG(ptr, len)
+#endif
+
+
 
 /** 
  * @brief 用一个值，来设置一段内存
@@ -97,7 +129,9 @@ static inline void byte_order_change(void* ptr, uint32_t len){
 
 /** 
  * @brief 用一个值，来设置一段内存
- *		此版本可以用数字设置，可以在windows编译器下使用
+ *		SET_MEM_VAL_TYPE:				设置时内存时原样拷贝，忽略字节序大小端
+ *		SET_LITTLE_MEM_VAL_TYPE:		设置内存时将其改变为小端存储 将根据系统情况来决定是否进行字节序转换
+ *		SET_BIG_MEM_VAL_TYPE:			设置内存时将其改变为大端存储 将根据系统情况来决定是否进行字节序转换
  * @param pdst 			目的地址
  * @param val 			值
  * @param type 			要设置值的类型
@@ -106,28 +140,11 @@ static inline void byte_order_change(void* ptr, uint32_t len){
 		do{\
 			*((type *)(pdst)) = (type)(val);\
 		}while(0)
-
-
-/* 设置内存时并将字节序翻转 */
-#define _SET_TURN_MEM_VAL_TYPE(pdst, val, type) \
-		do{\
-			*((type *)(pdst)) = (type)(val);\
-			byte_order_change((pdst), sizeof(type));\
-		}while(0)
-
-
-
-/** 
- * @brief 用一个值，来设置一段内存
- *		SET_LITTLE_MEM_VAL_TYPE: 设置时将其转换为小端
- *		SET_BIG_MEM_VAL_TYPE:	 设置时将其转换为大端
- * @param pdst 			目的地址
- * @param val 			值
- * @param type 			要设置值的类型
- */
+		
 #if _MEM_BYTE_ORDER == _MEM_BYTE_ORDER_LITTLE
 	#define SET_LITTLE_MEM_VAL_TYPE(pdst, val, type) 	SET_MEM_VAL_TYPE(pdst, val, type)
 	#define SET_BIG_MEM_VAL_TYPE(pdst, val, type)    	_SET_TURN_MEM_VAL_TYPE(pdst, val, type)
+
 #else
 	#define SET_BIG_MEM_VAL_TYPE(pdst, val, type)  	  	SET_MEM_VAL_TYPE(pdst, val, type)
 	#define SET_LITTLE_MEM_VAL_TYPE(pdst, val, type)  	_SET_TURN_MEM_VAL_TYPE(pdst, val, type)
