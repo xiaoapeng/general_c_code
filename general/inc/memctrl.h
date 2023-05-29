@@ -26,7 +26,7 @@ extern "C"{
 #define _MEM_BYTE_ORDER_BIG 	4321			/* 大端定义 */
 #define _MEM_BYTE_ORDER_LITTLE  1234			/* 小段定义 */
 
-/* 用户可在这里使用 _MEM_USER_DEF_ORDER 定义字节序 */
+/* 用户可在这里使用 _MEM_USER_DEF_ORDER 定义字节序, 一般不用定义 */
 //#define _MEM_USER_DEF_ORDER 	_MEM_BYTE_ORDER_LITTLE
 
 
@@ -59,34 +59,18 @@ extern "C"{
 	#endif
 #endif
 
-/* 设置内存时并将字节序翻转,不公开 */
-#define _SET_TURN_MEM_VAL_TYPE(pdst, val, type) \
-		do{\
-			*((type *)(pdst)) = (type)(val);\
-			byte_order_change((pdst), sizeof(type));\
-		}while(0)
 
 
 
-
-
-
-
-
-/**
- * @brief 内存字节序转换
- * @param ptr 			指针
- * @param len 			内容大小
- */
-static inline void byte_order_change(void* ptr, uint32_t len){
-	int i; char *p = (char*)(ptr);
+/* 内部：字节序转换 */
+static inline void _byte_order_change(void* ptr, uint32_t len){
+	uint32_t i; char *p = (char*)(ptr);
 	for(i=0;i<(len)/2;i++){
 		p[(len)-i-1] ^= p[i];
 		p[i] ^=p[(len)-i-1];
 		p[(len)-i-1] ^= p[i];
 	}
 }
-
 
 /**
  * @brief 指针以单字节自增
@@ -95,43 +79,55 @@ static inline void byte_order_change(void* ptr, uint32_t len){
  */
 #define MEM_INC(ptr, len) ((typeof(ptr))((char *)(ptr) + (len)))
 
+
+
 /**
- * @brief 内存字节序转换
+ * @brief 内存指针字节序转换
  *		BYTE_ORDER_CHANGE: 					执行字节序转换
- *		BYTE_ORDER_LITTLE_TO_SYSTEM:		将内存中的小端字节序转换为系统字节序
- *		BYTE_ORDER_BIG_TO_SYSTEM:			将内存中的大端字节序转换为系统字节序
+ *		BYTE_ORDER_LITTLE_TO_SYSTEM:		将内存中的 小端字节序 转换为 系统字节序
+ *		BYTE_ORDER_BIG_TO_SYSTEM:			将内存中的 大端字节序 转换为 系统字节序
+ *		BYTE_ORDER_LITTLE_TO_SYSTEM:		将内存中的 系统字节序 转换为 小端字节序
+ *		BYTE_ORDER_BIG_TO_SYSTEM:			将内存中的 系统字节序 转换为 大端字节序
  * @param ptr 			指针
  * @param len 			内容大小
  */
-#define BYTE_ORDER_CHANGE(ptr,len) byte_order_change((ptr), (len))
+#define MEM_BYTE_ORDER_CHANGE(ptr,len) _byte_order_change((void*)(ptr), (len))
 
 #if _MEM_BYTE_ORDER == _MEM_BYTE_ORDER_LITTLE
-	#define BYTE_ORDER_LITTLE_TO_SYSTEM(ptr, len) 
-	#define BYTE_ORDER_BIG_TO_SYSTEM(ptr, len) 		BYTE_ORDER_CHANGE(ptr,len)
+	#define MEM_BYTE_ORDER_LITTLE_TO_SYSTEM(ptr, len) 
+	#define MEM_BYTE_ORDER_BIG_TO_SYSTEM(ptr, len) 		MEM_BYTE_ORDER_CHANGE(ptr,len)
+	#define MEM_BYTE_ORDER_SYSTEM_TO_LITTLE(ptr, len) 
+	#define MEM_BYTE_ORDER_SYSTEM_TO_BIG(ptr, len) 		MEM_BYTE_ORDER_CHANGE(ptr,len)
 #else
-	#define BYTE_ORDER_TO_LITTLE(ptr, len) 		BYTE_ORDER_CHANGE(ptr,len)
-	#define BYTE_ORDER_TO_BIG(ptr, len)
+	#define MEM_BYTE_ORDER_LITTLE_TO_SYSTEM(ptr, len) 	MEM_BYTE_ORDER_CHANGE(ptr,len)
+	#define MEM_BYTE_ORDER_BIG_TO_SYSTEM(ptr, len) 		
+	#define MEM_BYTE_ORDER_SYSTEM_TO_LITTLE(ptr, len) 	MEM_BYTE_ORDER_CHANGE(ptr,len)
+	#define MEM_BYTE_ORDER_SYSTEM_TO_BIG(ptr, len) 		
 #endif
 
-
-
-/** 
- * @brief 用一个值，来设置一段内存
- *		val只有为变量的时候才能正确编译
- *		注意：该宏在windows编译器用不了,使用宏SET_MEM_VAL_TYPE替代
- * @param pdst 			目的地址
- * @param val 			值
+/**
+ * @brief 	变量的字节序转换
+ *		VAR_BYTE_ORDER_CHANGE: 					执行变量字节序转换
+ *		VAR_BYTE_ORDER_LITTLE_TO_SYSTEM:		将变量的 小端字节序 转换为 系统字节序
+ *		VAR_BYTE_ORDER_BIG_TO_SYSTEM:			将变量的 大端字节序 转换为 系统字节序
+ *		VAR_BYTE_ORDER_SYSTEM_TO_LITTLE:		将变量的 系统字节序 转换为 小端字节序
+ *		VAR_BYTE_ORDER_SYSTEM_TO_BIG:			将变量的 系统字节序 转换为 大端字节序
+ * @param val 			必须是变量
  */
-#define SET_MEM_VAL(pdst,val) \
-		do{\
-			*((typeof(&val))(pdst)) = (val);\
-		}while(0)
+#define VAR_BYTE_ORDER_CHANGE(val)  			MEM_BYTE_ORDER_CHANGE(&(val),sizeof(val))
+#define VAR_BYTE_ORDER_LITTLE_TO_SYSTEM(val)  	MEM_BYTE_ORDER_LITTLE_TO_SYSTEM(&(val),sizeof(val))
+#define VAR_BYTE_ORDER_BIG_TO_SYSTEM(val)  		MEM_BYTE_ORDER_BIG_TO_SYSTEM(&(val),sizeof(val))
+#define VAR_BYTE_ORDER_SYSTEM_TO_LITTLE(val)  	MEM_BYTE_ORDER_LITTLE_TO_SYSTEM(&(val),sizeof(val))
+#define VAR_BYTE_ORDER_SYSTEM_TO_BIG(val)  		MEM_BYTE_ORDER_BIG_TO_SYSTEM(&(val),sizeof(val))
+
 
 /** 
  * @brief 用一个值，来设置一段内存
- *		SET_MEM_VAL_TYPE:				设置时内存时原样拷贝，忽略字节序大小端
- *		SET_LITTLE_MEM_VAL_TYPE:		设置内存时将其改变为小端存储 将根据系统情况来决定是否进行字节序转换
- *		SET_BIG_MEM_VAL_TYPE:			设置内存时将其改变为大端存储 将根据系统情况来决定是否进行字节序转换
+ *		SET_MEM_VAL_TYPE:						将type类型的变量设置到指定内存中，忽略字节序大小端
+ *		SET_MEM_VAL_TYPE_SYSTEM_TO_LITTLE:		将type类型的系统字节序变量设置到指定内存，且以小端存储
+ *		SET_MEM_VAL_TYPE_SYSTEM_TO_BIG:			将type类型的系统字节序变量设置到指定内存，且以大端存储
+ *		SET_MEM_VAL_TYPE_LITTLE_TO_SYSTEM:		将type类型的小端字节序变量设置到指定内存，且以系统字节序存储
+ *		SET_MEM_VAL_TYPE_BIG_TO_SYSTEM:			将type类型的大端字节序变量设置到指定内存，且以系统字节序存储
  * @param pdst 			目的地址
  * @param val 			值
  * @param type 			要设置值的类型
@@ -140,16 +136,31 @@ static inline void byte_order_change(void* ptr, uint32_t len){
 		do{\
 			*((type *)(pdst)) = (type)(val);\
 		}while(0)
-		
-#if _MEM_BYTE_ORDER == _MEM_BYTE_ORDER_LITTLE
-	#define SET_LITTLE_MEM_VAL_TYPE(pdst, val, type) 	SET_MEM_VAL_TYPE(pdst, val, type)
-	#define SET_BIG_MEM_VAL_TYPE(pdst, val, type)    	_SET_TURN_MEM_VAL_TYPE(pdst, val, type)
 
-#else
-	#define SET_BIG_MEM_VAL_TYPE(pdst, val, type)  	  	SET_MEM_VAL_TYPE(pdst, val, type)
-	#define SET_LITTLE_MEM_VAL_TYPE(pdst, val, type)  	_SET_TURN_MEM_VAL_TYPE(pdst, val, type)
-#endif
+#define SET_MEM_VAL_TYPE_SYSTEM_TO_LITTLE(pdst, val, type) 	\
+		do{\
+			SET_MEM_VAL_TYPE(pdst, val, type);\
+			MEM_BYTE_ORDER_SYSTEM_TO_LITTLE(pdst, sizeof(type));\
+		}while(0)
 
+#define SET_MEM_VAL_TYPE_SYSTEM_TO_BIG(pdst, val, type) 	\
+		do{\
+			SET_MEM_VAL_TYPE(pdst, val, type);\
+			MEM_BYTE_ORDER_SYSTEM_TO_BIG(pdst, sizeof(type));\
+		}while(0)
+
+
+#define SET_MEM_VAL_TYPE_LITTLE_TO_SYSTEM(pdst, val, type) 	\
+		do{\
+			SET_MEM_VAL_TYPE(pdst, val, type);\
+			MEM_BYTE_ORDER_LITTLE_TO_SYSTEM(pdst, sizeof(type));\
+		}while(0)
+
+#define SET_MEM_VAL_TYPE_BIG_TO_SYSTEM(pdst, val, type) 	\
+		do{\
+			SET_MEM_VAL_TYPE(pdst, val, type);\
+			MEM_BYTE_ORDER_BIG_TO_SYSTEM(pdst, sizeof(type));\
+		}while(0)
 
 
 /** 
@@ -161,7 +172,11 @@ static inline void byte_order_change(void* ptr, uint32_t len){
 
 
 
-
+/*###################################### 向下兼容 ######################################*/
+/* 此函数只有gcc编译器可用 */
+#define SET_MEM_VAL(pdst,val) 			SET_MEM_VAL_TYPE(pdst, val, typeof(val))
+#define BYTE_ORDER_CHANGE(ptr,len)		MEM_BYTE_ORDER_CHANGE(ptr,len)
+/*######################################################################################*/
 
 #ifdef __cplusplus
 #if __cplusplus
