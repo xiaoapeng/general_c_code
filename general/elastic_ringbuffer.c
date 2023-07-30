@@ -35,35 +35,12 @@ static inline bool erb_empty(Erb *fifo)
 		return true;
 	return false;
 }
-#if 0
-typedef enum _FIFOSTUAT{
-	STUAT_WRITE_LOOP,		/* 写需要环回 */
-	STUAT_READ_LOOP,		/* 读需要环回 */
-	STUAT_NO_LOOP			/* 不需要环回 */
-}FIFOSTUAT;
 
-static inline FIFOSTUAT erb_stuat(Erb *fifo)
-{
-	if(fifo->write >= fifo->read)
-		return STUAT_WRITE_LOOP;
-	else
-		return STUAT_READ_LOOP;
-}
-#endif
-
-
-/*****************************************************************************
- 函 数 名  : erb_Size
- 功能描述  : 计算已经使用的缓冲区大小
- 输入参数  : fifo
- 输出参数  : 
- 返 回 值  : 
- 	返回缓冲区内字节流的大
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+/**
+ * @brief 计算已经使用的缓冲区大小
+ * @param  fifo             句柄
+ * @return uint32_t 
+ */
 uint32_t erb_Size(Erb *fifo)
 {
 	uint32_t write;
@@ -74,37 +51,23 @@ uint32_t erb_Size(Erb *fifo)
 	return write - fifo->read;
 }
 
-/*****************************************************************************
- 函 数 名  : erb_FreeSize
- 功能描述  : 计算可用缓冲区的大小
- 输入参数  : fifo
- 输出参数  : 
- 返 回 值  : 
- 	返回可用缓冲区的大小
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+
+/**
+ * @brief 计算可用缓冲区的大小
+ * @param  fifo            句柄
+ * @return uint32_t 
+ */
 uint32_t erb_FreeSize(Erb* fifo)
 {
 	return fifo->mem_size - erb_Size(fifo) - 1;
 }
 
-/*****************************************************************************
- 函 数 名  : erb_ReadAir
- 功能描述  : 读了个寂寞，只对读指针产生偏移，不拿出数据
- 输入参数  : 
- 		fifo
- 		buf_size:	想读寂寞的数量
- 输出参数  : 
- 返 回 值  : 
- 	返回可读寂寞的字节数量
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+/**
+ * @brief  读了个空气，只对读指针产生偏移，不拿出数据
+ * @param  fifo             句柄
+ * @param  buf_size         读出空气的大小
+ * @return uint32_t 
+ */
 uint32_t erb_ReadAir(Erb* fifo, uint32_t buf_size)
 {
 	uint32_t br=0;
@@ -114,38 +77,22 @@ uint32_t erb_ReadAir(Erb* fifo, uint32_t buf_size)
 	return br;
 }
 
-/*****************************************************************************
- 函 数 名  : erb_Clear
- 功能描述  : 完全清空环形缓冲区
- 输入参数  : 
- 		fifo
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+/**
+ * @brief  完全清空环形缓冲区
+ * @param  fifo             句柄
+ */
 void erb_Clear(Erb* fifo)
 {
 	fifo->read = fifo->write;
 }
 
-
-
-/*****************************************************************************
- 函 数 名  : erb_Peep
- 功能描述  : 偷偷观看，观看缓冲区可观看的数据,
- 输入参数  : 
- 		fifo
- 		expect_peep_size:		想偷看数据的大小
- 输出参数  : 
- 		reality_peep_size:		实际能偷看数据大大小
- 返 回 值  : 
- 		返回观看字节流数据的指针，注意该指针是只读的
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+/**
+ * @brief 	偷偷观看，观看缓冲区可观看的数据,
+ * @param  fifo             		句柄
+ * @param  expect_peep_size 		想偷看数据的大小
+ * @param  reality_peep_sizeMy 		想偷看数据的大小
+ * @return const uint8_t* 			返回观看字节流数据的指针，注意该指针是只读的
+ */
 const uint8_t* erb_Peep(Erb* fifo, uint32_t expect_peep_size, uint32_t* reality_peep_size)
 {
 	uint32_t br=0;
@@ -156,20 +103,12 @@ const uint8_t* erb_Peep(Erb* fifo, uint32_t expect_peep_size, uint32_t* reality_
 	return fifo->mem+fifo->read;
 }
 
-/*****************************************************************************
- 函 数 名  : erb_Peep
- 功能描述  : 偷偷观看所有数据
- 输入参数  : 
- 		fifo
- 输出参数  : 
- 		peep_size:		偷看数据大大小
- 返 回 值  : 
- 		返回观看字节流数据的指针，注意该指针是只读的
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+/**
+ * @brief 偷偷观看所有数据
+ * @param  fifo             句柄
+ * @param  peep_size        偷看数据大大小
+ * @return const uint8_t* 
+ */
 const uint8_t* erb_PeepAll(Erb* fifo, uint32_t* peep_size)
 {
 	uint32_t br=0;
@@ -179,20 +118,13 @@ const uint8_t* erb_PeepAll(Erb* fifo, uint32_t* peep_size)
 	return fifo->mem+fifo->read;
 }
 
-/*****************************************************************************
- 函 数 名  : erb_Read
- 功能描述  : 读缓冲区的数据,放入buf缓冲区中
- 输入参数  : 
- 		fifo
- 		buf:		存放字节流的指针
- 		buf_size：	缓冲区大小
- 返 回 值  : 
- 		返回读到的缓冲区大小
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+/**
+ * @brief  读缓冲区的数据,放入buf缓冲区中
+ * @param  fifo             句柄
+ * @param  buf              存放字节流的指针
+ * @param  buf_size         缓冲区大小
+ * @return uint32_t 		返回读到的缓冲区大小
+ */
 uint32_t erb_Read(Erb* fifo, uint8_t *buf, uint32_t buf_size)
 {
 	uint32_t br=0;
@@ -207,20 +139,13 @@ uint32_t erb_Read(Erb* fifo, uint8_t *buf, uint32_t buf_size)
 	return br;
 }
 
-/*****************************************************************************
- 函 数 名  : erb_Write
- 功能描述  : 写环形缓冲区
- 输入参数  : 
- 		fifo
- 		buf:		要写的数据
- 		buf_size：	要写的数据大小
- 返 回 值  : 
- 		写成功的数量
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+/**
+ * @brief 写环形缓冲区
+ * @param  fifo             句柄
+ * @param  buf              要写的数据
+ * @param  buf_size         要写的数据大小
+ * @return uint32_t 
+ */
 uint32_t erb_Write(Erb* fifo, uint8_t *buf, uint32_t buf_size)
 {
 	uint32_t wr = 0;
@@ -243,18 +168,11 @@ uint32_t erb_Write(Erb* fifo, uint8_t *buf, uint32_t buf_size)
 	return wr;
 }
 
-/*****************************************************************************
- 函 数 名  : erb_New
- 功能描述  : 新建一个环形缓冲区
- 输入参数  : 
- 		size:	环形缓冲区的容量
- 返 回 值  : 
- 		返回环形缓冲区句柄
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+/**
+ * @brief 新建一个环形缓冲区
+ * @param  size             环形缓冲区的容量
+ * @return Erb* 			返回一个实例
+ */
 Erb* erb_New(uint32_t size)
 {
 	Erb *erb_new;
@@ -270,45 +188,14 @@ Erb* erb_New(uint32_t size)
 	return erb_new;
 }
 
-/*****************************************************************************
- 函 数 名  : erb_Del
- 功能描述  : 删除环形缓冲区
- 输入参数  : 
- 		fifo  环形缓冲区句柄
- 修改历史      :
-  1.日    期   : 2021年3月3日
-    作    者   : 彭洋明
-    修改内容   : 新生成函数
-*****************************************************************************/
+/**
+ * @brief 删除环形缓冲区
+ * @param  fifo             句柄
+ */
 void erb_Del(Erb* fifo)
 {
 	_er_free(fifo);
 }
-
-
-
-#include "debug.h"
-void erb_test(void)
-{
-	Erb *fifo;
-	fifo = erb_New(20);
-	char bbufer[21] = {0};
-
-	erb_Write(fifo, (uint8_t *)"123456789", 10);
-	erb_Read(fifo,(uint8_t *)bbufer,10);
-	DBG_print(DBG_DEBUG, "读出%s", bbufer);
-
-	erb_Write(fifo, (uint8_t *)"123456789", 9);
-	erb_Write(fifo, (uint8_t *)"abcdefghij8", 11);
-	erb_Read(fifo,(uint8_t *)bbufer,20);
-	DBG_print(DBG_DEBUG, "读出%s", bbufer);
-
-	
-	erb_Del(fifo);
-}
-
-
-
 
 
 
