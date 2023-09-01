@@ -90,7 +90,7 @@ uint32_t crb_ReadAir(Crb* fifo, uint32_t buf_size)
  * @param  buf_size         要写的数据大小
  * @return uint32_t 
  */
-uint32_t crb_Write(Crb* fifo, uint8_t *buf, uint32_t buf_size)
+uint32_t crb_Write(Crb* fifo,const uint8_t *buf, uint32_t buf_size)
 {
 	uint32_t wr = 0;
 	uint32_t wr_first=0;
@@ -135,6 +135,30 @@ uint32_t crb_Read(Crb* fifo, uint8_t *buf, uint32_t buf_size)
 	fifo->read = crb_fix(fifo->read + br, fifo->mem_size);
 	return br;
 }
+
+/**
+ * @brief  偷看环形缓冲区的数据，但不进行偏移
+ * @param  fifo             句柄
+ * @param  buf              存放字节流的指针
+ * @param  buf_size         缓冲区大小
+ * @return uint32_t 		返回读到的缓冲区大小
+ */
+uint32_t crb_Peep(Crb* fifo, uint8_t *buf, uint32_t buf_size)
+{
+	uint32_t br=0;
+	uint32_t br_first=0;
+	/* 为空 */
+	if(crb_empty(fifo)) return 0;
+	
+	br = crb_Size(fifo);
+	br = br > buf_size ? buf_size : br ;
+	br_first = br > fifo->mem_size-fifo->read ? fifo->mem_size-fifo->read : br;
+	memcpy(buf, fifo->mem+fifo->read, br_first);
+	if(br-br_first)
+		memcpy(buf+br_first, fifo->mem+0, br-br_first);
+	return br;
+}
+
 
 
 /**
