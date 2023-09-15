@@ -23,7 +23,7 @@ extern "C"{
 
 
 extern uint16_t crc16(uint16_t init_val,const uint8_t* msg, uint16_t msg_len);
-
+extern uint32_t crc32(uint32_t init_val, const uint8_t* msg, uint32_t msg_len);
 
 #ifdef __cplusplus
 #if __cplusplus
