@@ -53,7 +53,7 @@ extern "C"{
 
 
 
-static __attribute__ ((__used__)) int __looppool_bool_debounce(uint32_t debounce_ms, int new_bool_state, uint32_t *last_time, 
+static __attribute__ ((__used__)) int __looppool_bool_debounce(uint32_t debounce_ms, uint32_t new_bool_state, uint32_t *last_time, 
                                         uint32_t *last_state, uint32_t *last_last_state, uint32_t *last_call_time){
     if(debounce_ms == 0) return new_bool_state;
     if(*last_state == 0xffffffff || (_looppool_get_tickms() - *last_call_time) > (debounce_ms/2))

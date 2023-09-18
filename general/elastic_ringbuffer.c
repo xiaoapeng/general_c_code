@@ -1,7 +1,8 @@
 /**
  * @file elastic_ringbuffer.c
  * @brief 
- *		环形缓冲器特殊实现，可直接获取数组进行数据解析，不需要绕回
+ *		环形缓冲器特殊实现，可直接在缓冲器内存上做数据解析，无需额外的拷贝和额外的缓冲区消耗。
+ *		缺点是需要两倍的内存来运行。
  * @author simon.xiaoapeng (simon.xiaoapeng@gmail.com)
  * @version 1.0
  * @date 2021-03-01
@@ -159,7 +160,7 @@ uint32_t erb_Write(Erb* fifo, uint8_t *buf, uint32_t buf_size)
 	memcpy(fifo->mem+fifo->write, buf, wr);
 
 	/* 进行环回 */
-	if(fifo->write + wr > fifo->mem_size)
+	if(fifo->write + wr > (uint32_t)fifo->mem_size)
 		memcpy(fifo->mem, fifo->mem_tmp, (fifo->write + wr) - fifo->mem_size);
 	else
 		memcpy(fifo->mem_tmp + fifo->write, buf, wr);
@@ -196,8 +197,3 @@ void erb_Del(Erb* fifo)
 {
 	_er_free(fifo);
 }
-
-
-
-
-

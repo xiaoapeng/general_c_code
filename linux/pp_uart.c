@@ -27,20 +27,20 @@
 #include <errno.h>      /*错误号定义*/
 #include <sys/time.h>
 
-static uint32_t baudRate_tab[] = {
+static int baudRate_tab[] = {
 	1200,2400,4800,9600, 19200, 38400, 
-	57600,	115200,230400
+	57600,	115200,230400,576000,921600,1000000
 };
 #define SPEED_CNT	(sizeof(baudRate_tab)/sizeof(baudRate_tab[0]))
 
 int speed_arr[SPEED_CNT] = {
 	B1200,B2400,B4800,B9600, B19200, B38400, 
-	B57600,	B115200,B230400
+	B57600,	B115200,B230400,B576000,B921600,B1000000
 };
 
 static int _set_speed(int fd, int speed)
 {
-	int i;
+	uint32_t i;
 	int status;
 	struct termios opt;
 	
