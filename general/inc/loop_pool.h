@@ -21,8 +21,68 @@ extern "C"{
 #endif
 #endif /* __cplusplus */
 #include "typedef.h"
+
 #define _looppool_get_tickms() GET_TICK()
 
+
+typedef enum LoopPoolTimerSta{
+    LPTS_IDIE,              /* 空闲状态 */
+    LPTS_WORK,              /* 工作状态 */
+}LoopPoolTimerSta;
+
+typedef struct _LoopPoolTimer{
+    LoopPoolTimerSta sta;
+    uint32_t start_time;
+    uint32_t time_out;
+}LoopPoolTimer;
+
+/**
+ * @brief  配置一个轮询式定时器
+ * @param  t                句柄
+ * @param  timeout          超时时间
+ */
+static inline void LoopPoolTimer_Config(LoopPoolTimer* t, uint32_t timeout){
+    t->sta = LPTS_IDIE;
+    t->time_out = timeout;
+    t->start_time = 0;
+}
+
+/**
+ * @brief  重新开始进行计时
+ * @param  t                句柄
+ */
+static inline void LoopPoolTimer_Reset(LoopPoolTimer* t){
+    t->sta = LPTS_WORK;
+    t->start_time = _looppool_get_tickms();
+}
+
+/**
+ * @brief  是否超时
+ * @param  t                句柄
+ * @return int 
+ */
+static inline int LoopPoolTimer_IsTimeout(LoopPoolTimer* t){
+    if(t->sta != LPTS_WORK) return 0;
+    return _looppool_get_tickms() - t->start_time > t->time_out;
+}
+
+/**
+ * @brief  停止计时
+ * @param  t                句柄
+ * @return int 
+ */
+static inline void LoopPoolTimer_Stop(LoopPoolTimer* t){
+    t->sta = LPTS_IDIE;
+}
+
+/**
+ * @brief  返回工作状态
+ * @param  t                句柄
+ * @return int 
+ */
+static inline LoopPoolTimerSta LoopPoolTimer_GetSta(LoopPoolTimer* t){
+    return t->sta;
+}
 
 /**
  * @brief 在循环中进行定时调用
