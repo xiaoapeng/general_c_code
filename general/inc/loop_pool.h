@@ -93,8 +93,9 @@ static inline LoopPoolTimerSta LoopPoolTimer_GetSta(LoopPoolTimer* t){
 #define LOOPPOOL_PHASE_CALL_MS(phase_ms, cycle_ms, action) do{      \
         static uint32_t __looppool_last_time = 0;   \
         uint32_t __looppool_current_time = _looppool_get_tickms();\
-        uint32_t __looppool_diff_time = __looppool_current_time - __looppool_last_time;\
+        uint32_t __looppool_diff_time;\
         __looppool_last_time = __looppool_last_time == 0 ? __looppool_current_time-cycle_ms+phase_ms : __looppool_last_time;  \
+        __looppool_diff_time = __looppool_current_time - __looppool_last_time;\
         if(cycle_ms == 0) { \
             action; \
         }else if(__looppool_diff_time >= cycle_ms){    \
@@ -111,6 +112,17 @@ static inline LoopPoolTimerSta LoopPoolTimer_GetSta(LoopPoolTimer* t){
  */
 #define LOOPPOOL_CALL_MS(cycle_ms, action) LOOPPOOL_PHASE_CALL_MS(0, cycle_ms, action)
 
+
+/**
+ * @brief 在循环中调用，但只运行一次，一次只有再也不允许
+ */
+#define LOOPPOOL_ONCE_CALL(action) do{              \
+        static uint32_t __looppool_is_run_once = 1;     \
+        if(__looppool_is_run_once){                     \
+            __looppool_is_run_once = 0;                 \
+            action;                                     \
+        }                                               \
+    }while(0)
 
 
 static __attribute__ ((__used__)) int __looppool_bool_debounce(uint32_t debounce_ms, uint32_t new_bool_state, uint32_t *last_time, 
