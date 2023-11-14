@@ -1,8 +1,8 @@
-
 /**
- * @file elastic_ringbuffer.c
- * @brief 
- *		环形缓冲器特殊实现，可直接获取数组进行数据解析，不需要绕回
+ * @file elastic_ringbuffer.h
+ * @brief
+ *		环形缓冲器特殊实现，可直接在缓冲器内存上做数据解析，无需额外的拷贝和额外的缓冲区消耗。
+ *		缺点是需要两倍的内存来运行。
  * @author simon.xiaoapeng (simon.xiaoapeng@gmail.com)
  * @version 1.0
  * @date 2021-03-01
@@ -35,11 +35,13 @@ typedef struct _Erb{
 	uint32_t 	write;		/* 环形缓冲区的写指针 */
 	uint32_t 	read;		/* 环形缓冲区的写指针 */
 	uint8_t 	*mem_tmp;	/* 某些操作使用的临时缓冲区 */
+  	int         is_static;   /* 环形缓冲区是否为静态存储 */
 }Erb;
 
 
 extern void erb_Del(Erb* fifo);
 extern Erb* erb_New(uint32_t size);
+extern int erb_StaticNew(Erb* fifo, uint8_t* buf, uint32_t size);
 extern uint32_t erb_Read(Erb* fifo, uint8_t *buf, uint32_t buf_size);
 extern uint32_t erb_Write(Erb* fifo, uint8_t *buf, uint32_t buf_size);
 extern uint32_t erb_ReadAir(Erb* fifo, uint32_t buf_size);

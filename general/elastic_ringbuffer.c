@@ -185,9 +185,28 @@ Erb* erb_New(uint32_t size)
 	erb_new->mem 	  	= (uint8_t *)(erb_new+1);	
 	erb_new->mem_tmp 	= erb_new->mem + size;
 	erb_new->mem_size 	= size;
-	erb_new->read 		= erb_new->write = 0;	
+	erb_new->read 		= erb_new->write = 0;
+	erb_new->is_static  = 0;
 	return erb_new;
 }
+
+/**
+ * @brief 静态方式创建环形缓冲区
+ * @param  fifo             实例化后的指针
+ * @param  buf              环形缓冲区的缓冲区指针，实际大小必须是size的两倍
+ * @param  size             环形缓冲区大小，必须是实际使用buf大小的一半
+ * @return int 
+ */
+int erb_StaticNew(Erb* fifo, uint8_t* buf, uint32_t size)
+{
+	fifo->mem 	  	= buf;	
+	fifo->mem_tmp 	= buf + size;
+	fifo->mem_size 	= size;
+	fifo->read 		= fifo->write = 0;
+	fifo->is_static  = 1;
+	return 0;
+}
+
 
 /**
  * @brief 删除环形缓冲区
@@ -195,5 +214,6 @@ Erb* erb_New(uint32_t size)
  */
 void erb_Del(Erb* fifo)
 {
-	_er_free(fifo);
+	if(!fifo->is_static)
+		_er_free(fifo);
 }
