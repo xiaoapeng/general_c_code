@@ -41,14 +41,13 @@ static inline bool crb_empty(Crb *fifo)
  */
 uint32_t crb_Size(Crb *fifo)
 {
-	uint32_t write;
-	if(fifo->read > fifo->write)
-		write = fifo->write + fifo->mem_size;
-	else
-		write = fifo->write;
-	return write - fifo->read;
+	uint32_t write = fifo->write;
+	uint32_t read = fifo->read;
+	
+	write = read > write ? write + fifo->mem_size : write;
+	
+	return write - read;
 }
-
 /**
  * @brief 计算可用缓冲区的大小
  * @param  fifo            句柄
