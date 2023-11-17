@@ -24,7 +24,7 @@ extern "C"{
 
 
 #define _MEM_BYTE_ORDER_BIG 	4321			/* 大端定义 */
-#define _MEM_BYTE_ORDER_LITTLE  1234			/* 小段定义 */
+#define _MEM_BYTE_ORDER_LITTLE  1234			/* 小端定义 */
 
 /* 用户可在这里使用 _MEM_USER_DEF_ORDER 定义字节序, 一般不用定义 */
 //#define _MEM_USER_DEF_ORDER 	_MEM_BYTE_ORDER_LITTLE
@@ -79,7 +79,12 @@ static inline void _byte_order_change(void* ptr, uint32_t len){
  */
 #define MEM_INC(ptr, len) ((typeof(ptr))((char *)(ptr) + (len)))
 
-
+/** 
+ * @brief 获取内存中某个类型的值
+ * @param pdst 			某段内存
+ * @param type 			类型
+ */
+#define GET_MEM_VAL(psrc, type)  (*((type *)(psrc)))
 
 /**
  * @brief 内存指针字节序转换
@@ -164,11 +169,31 @@ static inline void _byte_order_change(void* ptr, uint32_t len){
 
 
 /** 
- * @brief 获取内存中某个类型的值
- * @param pdst 			某段内存
- * @param type 			类型
+ * @brief 用段内存，来设置一段内存
+ *		SET_MEM_MEM_TYPE:						将type类型的指针设置到指定内存中，忽略字节序大小端
+ *		SET_MEM_MEM_TYPE_SYSTEM_TO_LITTLE:		将type类型的系统字节序指针设置到指定内存，且以小端存储
+ *		SET_MEM_MEM_TYPE_SYSTEM_TO_BIG:			将type类型的系统字节序指针设置到指定内存，且以大端存储
+ *		SET_MEM_MEM_TYPE_LITTLE_TO_SYSTEM:		将type类型的小端字节序指针设置到指定内存，且以系统字节序存储
+ *		SET_MEM_MEM_TYPE_BIG_TO_SYSTEM:			将type类型的大端字节序指针设置到指定内存，且以系统字节序存储
+ * @param pdst 			目的地址
+ * @param psrc 			值
+ * @param type 			要设置值的类型
  */
-#define GET_MEM_VAL(psrc, type)  (*((type *)(psrc)))
+
+#define SET_MEM_MEM_TYPE(pdst, psrc, type)	\
+	SET_MEM_VAL_TYPE(pdst, GET_MEM_VAL(psrc,type), type)
+
+#define SET_MEM_MEM_TYPE_SYSTEM_TO_LITTLE(pdst, psrc, type)	\
+	SET_MEM_VAL_TYPE_SYSTEM_TO_LITTLE(pdst, GET_MEM_VAL(psrc, type), type)
+
+#define SET_MEM_MEM_TYPE_SYSTEM_TO_BIG(pdst, psrc, type)	\
+	SET_MEM_VAL_TYPE_SYSTEM_TO_BIG(pdst, GET_MEM_VAL(psrc, type), type)
+
+#define SET_MEM_MEM_TYPE_LITTLE_TO_SYSTEM(pdst, psrc, type)	\
+	SET_MEM_VAL_TYPE_LITTLE_TO_SYSTEM(pdst, GET_MEM_VAL(psrc ,type), type)
+
+#define SET_MEM_MEM_TYPE_BIG_TO_SYSTEM(pdst, psrc, type)	\
+	SET_MEM_VAL_TYPE_BIG_TO_SYSTEM(pdst, GET_MEM_VAL(psrc, type), type)
 
 
 
