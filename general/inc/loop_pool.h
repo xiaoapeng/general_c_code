@@ -96,11 +96,10 @@ static inline LoopPoolTimerSta LoopPoolTimer_GetSta(LoopPoolTimer* t){
         uint32_t __looppool_diff_time;\
         __looppool_last_time = __looppool_last_time == 0 ? __looppool_current_time-cycle_ms+phase_ms : __looppool_last_time;  \
         __looppool_diff_time = __looppool_current_time - __looppool_last_time;\
-        if(cycle_ms == 0) { \
-            action; \
-        }else if(__looppool_diff_time >= cycle_ms){    \
-            __looppool_last_time += __looppool_diff_time/cycle_ms*cycle_ms;   \
-            action; \
+        if(cycle_ms == 0 || (__looppool_diff_time >= cycle_ms)) {   \
+            if(cycle_ms)                                            \
+                __looppool_last_time += __looppool_diff_time/cycle_ms*cycle_ms;   \
+            {action;} \
         }\
     }while(0)
 
