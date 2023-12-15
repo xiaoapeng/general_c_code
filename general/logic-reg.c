@@ -77,10 +77,10 @@ static int _CbRead(RegGroup *reg_g, uint16_t addr, uint16_t size, uint8_t *reg_d
             return size;
         case CBREG_CMD_READ:
             if(size > crb_Size(crb)) return 0;
-            return crb_Read(crb, reg_data, size);
+            return (int)crb_Read(crb, reg_data, size);
         case CBREG_CMD_PEEP:
             if(size > crb_Size(crb)) return 0;
-            return crb_Peep(crb, reg_data, size);
+            return (int)crb_Peep(crb, reg_data, size);
     }
     return 0;
 }
@@ -91,7 +91,7 @@ static int _CbWrite(RegGroup *reg_g, uint16_t addr, uint16_t size, const uint8_t
     switch (addr) {
         case CBREG_CMD_WRITE:
             if(size > crb_FreeSize(crb)) return 0;
-            return crb_Write(crb, reg_data, size);
+            return (int)crb_Write(crb, reg_data, size);
         case CBREG_CMD_CLEAN:
             if(size != 1) return 0;
             crb_Clear(crb);
@@ -172,6 +172,23 @@ int LogicReg_RegisterGroup(RegGroup *static_reg_group){
         }
     }
     return -1;
+}
+
+
+/**
+ * @brief 注销寄存器组
+ * @param  static_reg_group     寄存器组描述结构
+ * @return int                  成功0 失败-1
+ */
+void LogicReg_UnregisterGroup(RegGroup *static_reg_group){
+    
+    for(int i=0;i<LOGICREG_MAX_GROUP_CNT;i++){
+        if(logiRegRun.reg_group[i] == static_reg_group){
+            logiRegRun.reg_group[i] = NULL;
+            return ;
+        }
+    }
+    return ;
 }
 
 

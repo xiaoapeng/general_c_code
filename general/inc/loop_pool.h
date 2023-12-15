@@ -63,7 +63,7 @@ static inline void LoopPoolTimer_Reset(LoopPoolTimer* t){
  */
 static inline int LoopPoolTimer_IsTimeout(LoopPoolTimer* t){
     if(t->sta != LPTS_WORK) return 0;
-    return _looppool_get_tickms() - t->start_time > t->time_out;
+    return (_looppool_get_tickms() - t->start_time) >= t->time_out;
 }
 
 /**
@@ -124,10 +124,10 @@ static inline LoopPoolTimerSta LoopPoolTimer_GetSta(LoopPoolTimer* t){
     }while(0)
 
 
-static __attribute__ ((__used__)) int __looppool_bool_debounce(uint32_t debounce_ms, uint32_t new_bool_state, uint32_t *last_time, 
-                                        uint32_t *last_state, uint32_t *last_last_state, uint32_t *last_call_time){
+static __attribute__ ((__used__)) int __looppool_bool_debounce(uint32_t debounce_ms, int new_bool_state, uint32_t *last_time, 
+                                        int *last_state, int *last_last_state, uint32_t *last_call_time){
     if(debounce_ms == 0) return new_bool_state;
-    if(*last_state == 0xffffffff || (_looppool_get_tickms() - *last_call_time) > (debounce_ms/2))
+    if(*last_state == -1 || (_looppool_get_tickms() - *last_call_time) > (debounce_ms/2))
     {
         *last_time = _looppool_get_tickms();
         *last_call_time = _looppool_get_tickms();
@@ -154,12 +154,30 @@ static __attribute__ ((__used__)) int __looppool_bool_debounce(uint32_t debounce
  */
 #define LOOPPOOL_BOOL_DEBOUNCE(debounce_ms, current_bool)       ({\
     static uint32_t __last_time__ = 0;                                  \
-    static uint32_t __last_state__ = 0xffffffff;                        \
-    static uint32_t __last_last_state__ = 0;                            \
+    static int      __last_state__ = -1;                                \
+    static int      __last_last_state__ = 0;                            \
     static uint32_t __last_call_time__ = 0;                             \
     __looppool_bool_debounce(debounce_ms, !!(current_bool), &__last_time__, &__last_state__, &__last_last_state__, &__last_call_time__);  \
 })
 
+/**
+ * @brief 对于任意一个变量，若前一次调用和后一次调用值发生了改变则调用 action
+ */
+#define LOOPPOOL_TYPE_VARIABLE_CHANGE_CALL(type, variable_init, variable, action) do{      \
+        static type _last_variable_ = (variable_init);                          \
+        type _variable_tmp = (variable);                                        \
+        if(_variable_tmp != _last_variable_){                                   \
+            _last_variable_ = _variable_tmp;                                    \
+            action;                                                             \
+        }                                                                       \
+    }while(0)
+
+
+/**
+ * @brief 对于一个U32的变量，若前一次调用和后一次调用值发生了改变则调用 action
+ */
+#define LOOPPOOL_U32_VARIABLE_CHANGE_CALL(variable_init, variable, action) \
+    LOOPPOOL_TYPE_VARIABLE_CHANGE_CALL(uint32_t, variable_init, variable, action)
 
 
 #ifdef __cplusplus

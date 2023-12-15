@@ -43,11 +43,10 @@ uint32_t crb_Size(Crb *fifo)
 {
 	uint32_t write = fifo->write;
 	uint32_t read = fifo->read;
-	
 	write = read > write ? write + fifo->mem_size : write;
-	
 	return write - read;
 }
+
 /**
  * @brief 计算可用缓冲区的大小
  * @param  fifo            句柄
@@ -185,7 +184,7 @@ Crb* crb_New(uint32_t size)
  * @param  size             缓冲区大小
  * @return int 
  */
-int crb_static_new(Crb* crb, uint8_t* buf, uint32_t size){
+int crb_StaticNew(Crb* crb, uint8_t* buf, uint32_t size){
 	if(buf == NULL || crb == NULL || size <= 1) 
 		return -1;
 	crb->mem 	  	= buf;

@@ -1,6 +1,6 @@
 /**
  * @file bits.h
- * @brief 针对内存的bit操作
+ * @brief 内存bit位操作
  * @author simon.xiaoapeng (simon.xiaoapeng@gmail.com)
  * @version 1.0
  * @date 2020-12-26
@@ -60,6 +60,6 @@
 
 /* 获取某个地址第n个比特位的状态 */
 #define Get_Bit(Start, bit_x)	((((uint8_t*)(Start))[(bit_x)/8] >> ((bit_x) % 8)) & 1)
-#define Set_Bit(Start, bit_x, val) ((uint8_t*)(Start))[(bit_x)/8] =  ((((uint8_t*)(Start))[(bit_x)/8] & (~(1 << ((bit_x) % 8)))) | (((val) ? 1 : 0) << ((bit_x) % 8)))
+#define Set_Bit(Start, bit_x, val) ((uint8_t*)(Start))[(bit_x)/8] =  (uint8_t)((((uint8_t*)(Start))[(bit_x)/8] & (~(1 << ((bit_x) % 8)))) | (((val) ? 1 : 0) << ((bit_x) % 8)))
 
 #endif /* __BITS_H__ */

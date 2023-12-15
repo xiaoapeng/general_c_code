@@ -21,7 +21,7 @@
 
 #include "common_ringbuffer.h"
 
-#define LOGICREG_MAX_GROUP_CNT      5           /* 最多支持5组寄存器 */
+#define LOGICREG_MAX_GROUP_CNT      10           /* 最多支持5组寄存器 */
 
 
 #define CBREG_CMD_GET_SIZE         0x00         /* 读4个字节 获取已用容量 */
@@ -50,6 +50,7 @@ typedef struct _RegGroupDefine{
 extern int LogicReg_Read(uint16_t addr, uint16_t size, uint8_t *reg_data);
 extern int LogicReg_Write(uint16_t addr, uint16_t size, const uint8_t *reg_data);
 extern int LogicReg_RegisterGroup(RegGroup *static_reg_group);
+extern void LogicReg_UnregisterGroup(RegGroup *static_reg_group);
 extern int LogicReg_Init(void); 
 
  

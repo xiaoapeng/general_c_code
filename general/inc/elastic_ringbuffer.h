@@ -31,7 +31,7 @@ typedef int32_t er_ssize_t;
 
 typedef struct _Erb{
 	uint8_t 	*mem;		/* 环形缓冲区使用存储空间上 */
-	er_ssize_t 	mem_size;	/* 环形缓冲区的大小 */
+	uint32_t 	mem_size;	/* 环形缓冲区的大小 */
 	uint32_t 	write;		/* 环形缓冲区的写指针 */
 	uint32_t 	read;		/* 环形缓冲区的写指针 */
 	uint8_t 	*mem_tmp;	/* 某些操作使用的临时缓冲区 */

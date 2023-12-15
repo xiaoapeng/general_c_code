@@ -50,6 +50,8 @@ uint32_t erb_Size(Erb *fifo)
 	return write - read;
 }
 
+
+
 /**
  * @brief 计算可用缓冲区的大小
  * @param  fifo            句柄

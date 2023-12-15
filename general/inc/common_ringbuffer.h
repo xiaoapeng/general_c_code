@@ -28,7 +28,7 @@ typedef int32_t er_ssize_t;
 
 typedef struct _Crb{
 	uint8_t 	*mem;		/* 环形缓冲区使用存储空间上 */
-	er_ssize_t 	mem_size;	/* 环形缓冲区的大小 */
+	uint32_t 	mem_size;	/* 环形缓冲区的大小 */
 	uint32_t 	write;		/* 环形缓冲区的写指针 */
 	uint32_t 	read;		/* 环形缓冲区的写指针 */
     int         is_static;   /* 环形缓冲区是否为静态存储 */
@@ -37,7 +37,7 @@ typedef struct _Crb{
 
 extern void crb_Del(Crb* fifo);
 extern Crb* crb_New(uint32_t size);
-extern int crb_static_new(Crb* crb, uint8_t* buf, uint32_t size);
+extern int crb_StaticNew(Crb* crb, uint8_t* buf, uint32_t size);
 extern uint32_t crb_Read(Crb* fifo, uint8_t *buf, uint32_t buf_size);
 extern uint32_t crb_Peep(Crb* fifo, uint8_t *buf, uint32_t buf_size);
 extern uint32_t crb_Write(Crb* fifo, const uint8_t *buf, uint32_t buf_size);
