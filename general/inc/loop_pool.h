@@ -85,6 +85,15 @@ static inline LoopPoolTimerSta LoopPoolTimer_GetSta(LoopPoolTimer* t){
 }
 
 /**
+ * @brief 强行使定时器超时
+ * @param  t                句柄
+ */
+static inline void LoopPoolTimer_ForceTimeout(LoopPoolTimer* t){
+    t->sta = LPTS_WORK;
+    t->start_time = _looppool_get_tickms() - t->time_out;
+}
+
+/**
  * @brief 在循环中进行定时调用
  * @param phase_ms          相位，第一次运行将会偏相，此值应该小于等于cycle_ms，当为0时与LOOPPOOL_CALL_MS一样
  * @param cycle_ms          定时时间
