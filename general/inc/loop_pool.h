@@ -99,7 +99,7 @@ static inline void LoopPoolTimer_ForceTimeout(LoopPoolTimer* t){
  * @param cycle_ms          定时时间
  * @param action            需要被定时调用的代码块
  */
-#define LOOPPOOL_PHASE_CALL_MS(phase_ms, cycle_ms, action) do{      \
+#define LOOPPOOL_PHASE_CALL_MS(phase_ms, cycle_ms, action) ({      \
         static uint32_t __looppool_last_time = 0;   \
         uint32_t __looppool_current_time = _looppool_get_tickms();\
         uint32_t __looppool_diff_time;\
@@ -110,7 +110,7 @@ static inline void LoopPoolTimer_ForceTimeout(LoopPoolTimer* t){
                 __looppool_last_time += __looppool_diff_time/cycle_ms*cycle_ms;   \
             {action;} \
         }\
-    }while(0)
+    })
 
 
 /**
@@ -124,13 +124,13 @@ static inline void LoopPoolTimer_ForceTimeout(LoopPoolTimer* t){
 /**
  * @brief 在循环中调用，但只运行一次，一次只有再也不允许
  */
-#define LOOPPOOL_ONCE_CALL(action) do{              \
+#define LOOPPOOL_ONCE_CALL(action) ({              \
         static uint32_t __looppool_is_run_once = 1;     \
         if(__looppool_is_run_once){                     \
             __looppool_is_run_once = 0;                 \
             action;                                     \
         }                                               \
-    }while(0)
+    })
 
 
 static __attribute__ ((__used__)) int __looppool_bool_debounce(uint32_t debounce_ms, int new_bool_state, uint32_t *last_time, 
@@ -172,14 +172,14 @@ static __attribute__ ((__used__)) int __looppool_bool_debounce(uint32_t debounce
 /**
  * @brief 对于任意一个变量，若前一次调用和后一次调用值发生了改变则调用 action
  */
-#define LOOPPOOL_TYPE_VARIABLE_CHANGE_CALL(type, variable_init, variable, action) do{      \
+#define LOOPPOOL_TYPE_VARIABLE_CHANGE_CALL(type, variable_init, variable, action) ({      \
         static type _last_variable_ = (variable_init);                          \
         type _variable_tmp = (variable);                                        \
         if(_variable_tmp != _last_variable_){                                   \
             _last_variable_ = _variable_tmp;                                    \
             action;                                                             \
         }                                                                       \
-    }while(0)
+    })
 
 
 /**
