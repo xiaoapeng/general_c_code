@@ -66,9 +66,9 @@ argparse_getvalue(struct argparse *self, const struct argparse_option *opt,
         break;
     case ARGPARSE_OPT_BIT:
         if (flags & OPT_UNSET) {
-            *(int *)opt->value &= ~opt->data;
+            *(int *)opt->value &= (int)(~opt->data);
         } else {
-            *(int *)opt->value |= opt->data;
+            *(int *)opt->value |= (int)(opt->data);
         }
         break;
     case ARGPARSE_OPT_STRING:
@@ -85,11 +85,11 @@ argparse_getvalue(struct argparse *self, const struct argparse_option *opt,
     case ARGPARSE_OPT_INTEGER:
         errno = 0;
         if (self->optvalue) {
-            *(int *)opt->value = strtol(self->optvalue, (char **)&s, 0);
+            *(int *)opt->value = (int)strtol(self->optvalue, (char **)&s, 0);
             self->optvalue     = NULL;
         } else if (self->argc > 1) {
             self->argc--;
-            *(int *)opt->value = strtol(*++self->argv, (char **)&s, 0);
+            *(int *)opt->value = (int)strtol(*++self->argv, (char **)&s, 0);
         } else {
             argparse_error(self, opt, "requires a value", flags);
         }
@@ -280,7 +280,7 @@ unknown:
 
 end:
     memmove(self->out + self->cpidx, self->argv,
-            (size_t)self->argc * sizeof(*self->out));
+            (unsigned int)(self->argc) * sizeof(*self->out));
     self->out[self->cpidx + self->argc] = NULL;
 
     return self->cpidx + self->argc;
