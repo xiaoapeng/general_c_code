@@ -142,8 +142,8 @@ void debug_phex(const void *buf,  int len)
 	const uint8_t *start = buf;
 	uint32_t y,x,i=0;
 	uint32_t y_n, x_n;
-	y_n = len / 16;
-	x_n = len % 16;
+	y_n = (uint32_t)(len / 16);
+	x_n = (uint32_t)(len % 16);
 	
 	PRINT_LOCK();
 
