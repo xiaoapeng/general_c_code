@@ -89,7 +89,7 @@ extern void debug_exit(void);
  */
 #define DBG_ERROR_EXEC(expression, label, action)  do{          \
     if(expression){                                             \
-        DBG_print_fl(DBG_ERR,label ": ("#expression") execute {"#action"}"); \
+        DBG_print_fl(DBG_ERR,label ": (%s) execute {%s}", #expression, #action); \
         action;                                                 \
     }                                                           \
 }while(0)
