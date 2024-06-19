@@ -17,7 +17,7 @@
 
 /* 32位计算机 */
 
-#define WB(x) UINT32_MAX >> (32-x)
+#define WB(x) (UINT32_MAX >> (32-(x)))
 
 #define W_1		WB(1)
 #define W_2		WB(2)
@@ -29,6 +29,7 @@
 #define W_8		WB(8)
 #define W_9		WB(9)
 #define W_10	WB(10)
+#define W_11	WB(11)
 #define W_12	WB(12)
 #define W_13	WB(13)
 #define W_14	WB(14)

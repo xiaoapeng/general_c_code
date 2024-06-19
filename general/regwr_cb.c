@@ -54,7 +54,7 @@ int RegWrCb_Size(RegWrCbHandle *h, uint16_t cb_addr, uint32_t timeout){
 int RegWrCb_FreeSize(RegWrCbHandle *h, uint16_t cb_addr, uint32_t timeout){
     int ret;
     int size;
-    ret = h->read_reg(cb_addr+CBREG_CMD_GET_FREESIZE, (uint8_t*)&size, 4, timeout);
+    ret = h->read_reg((uint16_t)(cb_addr+CBREG_CMD_GET_FREESIZE), (uint8_t*)&size, 4, timeout);
     if(ret < 0) return ret;
     return size;
 }
@@ -74,7 +74,7 @@ int RegWrCb_Read(RegWrCbHandle *h, uint16_t cb_addr, uint8_t *buf, uint32_t buf_
     if(ret < 0) return ret;
     if(ret == 0) return 0;
     r_len = r_len > ret ? (uint16_t)ret : r_len;
-    ret = h->read_reg(cb_addr+CBREG_CMD_READ, buf, r_len, timeout);
+    ret = h->read_reg((uint16_t)(cb_addr+CBREG_CMD_READ), buf, r_len, timeout);
     if(ret < 0) return ret;
     return r_len;
 }
@@ -98,7 +98,7 @@ int RegWrCb_GranRead(RegWrCbHandle *h, uint16_t cb_addr, uint8_t *data, uint32_t
     r_num = ((uint16_t)((uint16_t)ret/gran_size)) > r_num ? r_num : (uint16_t)((uint16_t)ret/gran_size);
     if(r_num == 0) return 0;
     r_len = (uint16_t)(r_num*gran_size);
-    ret = h->read_reg(cb_addr+CBREG_CMD_READ, data, r_len, timeout);
+    ret = h->read_reg((uint16_t)(cb_addr+CBREG_CMD_READ), data, r_len, timeout);
     if(ret < 0) return ret;
     return r_num;
 }
@@ -119,7 +119,7 @@ int RegWrCb_Write(RegWrCbHandle *h, uint16_t cb_addr, const uint8_t *data, uint3
     if(ret < 0) return ret;
     if(ret == 0) return 0;
     w_len = w_len > ret ? (uint16_t)ret : w_len;
-    ret = h->write_reg(cb_addr+CBREG_CMD_WRITE, data, w_len, timeout);
+    ret = h->write_reg((uint16_t)(cb_addr+CBREG_CMD_WRITE), data, w_len, timeout);
     if(ret < 0) return ret;
     return w_len;
 }
@@ -143,7 +143,7 @@ int RegWrCb_GranWrite(RegWrCbHandle *h, uint16_t cb_addr, const uint8_t *data, u
     w_num = ((uint16_t)((uint16_t)ret/gran_size)) > w_num ? w_num : (uint16_t)((uint16_t)ret/gran_size);
     if(w_num == 0) return 0;
     w_len = (uint16_t)(w_num*gran_size);
-    ret = h->write_reg(cb_addr+CBREG_CMD_WRITE, data, w_len, timeout);
+    ret = h->write_reg((uint16_t)(cb_addr+CBREG_CMD_WRITE), data, w_len, timeout);
     if(ret < 0) return ret;
     return w_num;
 }
@@ -157,7 +157,7 @@ int RegWrCb_GranWrite(RegWrCbHandle *h, uint16_t cb_addr, const uint8_t *data, u
 int RegWrCb_Clean(RegWrCbHandle *h, uint16_t cb_addr, uint32_t timeout){
     int ret;
     uint8_t ch = 0x00;
-    ret = h->write_reg(cb_addr+CBREG_CMD_CLEAN, &ch, 1, timeout);
+    ret = h->write_reg((uint16_t)(cb_addr+CBREG_CMD_CLEAN), &ch, 1, timeout);
     if(ret < 0) return ret;
     return 0;
 }
@@ -176,7 +176,7 @@ int RegWrCb_ReadAir(RegWrCbHandle *h, uint16_t cb_addr, uint32_t read_size, uint
     if(ret < 0) return ret;
     if(ret == 0) return 0;
     r_len = r_len > (uint32_t)ret ? (uint32_t)ret : r_len;
-    ret = h->write_reg(cb_addr+CBREG_CMD_READAIR, (uint8_t *)&r_len, 4, timeout);
+    ret = h->write_reg((uint16_t)(cb_addr+CBREG_CMD_READAIR), (uint8_t *)&r_len, 4, timeout);
     if(ret < 0) return ret;
     return (int)r_len;
 }
@@ -198,7 +198,7 @@ int RegWrCb_Peep(RegWrCbHandle *h, uint16_t cb_addr, uint8_t *buf, uint32_t buf_
     if(ret < 0) return ret;
     if(ret == 0) return 0;
     r_len = r_len > ret ? (uint16_t)ret : r_len;
-    ret = h->read_reg(cb_addr+CBREG_CMD_PEEP, buf, r_len, timeout);
+    ret = h->read_reg((uint16_t)(cb_addr+CBREG_CMD_PEEP), buf, r_len, timeout);
     if(ret < 0) return ret;
     return r_len;
 }
