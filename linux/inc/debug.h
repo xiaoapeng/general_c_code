@@ -114,9 +114,9 @@ extern int dbg_set_level(enum dbg_level level);
 extern int dbg_raw(enum dbg_level level, enum dbg_flags flags, const char *fmt, ...);
 extern int vdbg_raw(enum dbg_level level, enum dbg_flags flags, const char *fmt, va_list args);
 extern int dbg_hex(enum dbg_level level, enum dbg_flags flags, size_t len, const void *buf);
-#define dbg_println(level, tag_str, fmt, ...)     dbg_raw(level, DBG_FLAGS, tag_str fmt DEBUG_ENTER_SIGN , ##__VA_ARGS__)
-#define dbg_printfl(level, tag_str, fmt, ...)     dbg_raw(level, DBG_FLAGS, tag_str "[%s, %d]: " fmt DEBUG_ENTER_SIGN , __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#define dbg_printraw(level, fmt, ...)             dbg_raw(level, 0, fmt, ##__VA_ARGS__)
+#define dbg_println(level, tag_str, fmt, ...)     dbg_raw((enum dbg_level)level, (enum dbg_flags)DBG_FLAGS, tag_str fmt DEBUG_ENTER_SIGN , ##__VA_ARGS__)
+#define dbg_printfl(level, tag_str, fmt, ...)     dbg_raw((enum dbg_level)level, (enum dbg_flags)DBG_FLAGS, tag_str "[%s, %d]: " fmt DEBUG_ENTER_SIGN , __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define dbg_printraw(level, fmt, ...)             dbg_raw((enum dbg_level)level, 0, fmt, ##__VA_ARGS__)
 
 /* ######################## 下面是简单写法 ####################### */
 /* 带自动回车的版本 */
