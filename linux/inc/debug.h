@@ -15,6 +15,7 @@
 
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -189,9 +190,9 @@ extern int dbg_hex(enum dbg_level level, enum dbg_flags flags, size_t len, const
 /**
     * @brief 打印错误原因，且执行 action 语句
     */
-#define DBG_ERROR_EXEC(expression, action)  do{                              \
+#define DBG_ERROR_EXEC(expression, action)  do{                                 \
     if(expression){                                                             \
-        dbg_printfl(DBG_ERR, "(%s) execute {%s}", #expression, #action); \
+        dbg_printfl(DBG_ERR, "", "(%s) execute {%s}", #expression, #action);    \
         action;                                                                 \
     }                                                                           \
 }while(0)
